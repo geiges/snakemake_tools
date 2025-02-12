@@ -13,3 +13,14 @@ rule test_rule:
     script:
         'script_dummy.py'
 
+rule rule_auto_created:
+	input:
+		config = "configfile",
+		input_file_1 = "input_{case}.csv",
+		input_file_2 = "input_other{case}.csv",
+	conda:
+		"envs/environment_updated.yml"
+	output:
+		output_file = "output_{cast}.csv",
+	script:
+		"script_template_updated.py"

@@ -61,7 +61,7 @@ def  get_rule_string_block(scriptfile):
      with open(scriptfile, 'r') as fid:
          
          for line in fid.readlines():
-             print(line)
+             #print(line)
              
              if '#SNAKE_DEF' in line:
              
@@ -110,6 +110,7 @@ def add_snakemake_rule(snakefile, scriptfile):
     
     
     rule_strings = get_rule_string_block(scriptfile)
+    #print(rule_strings)
     with open(snakefile, "a") as myfile:
         myfile.write('\n'.join(rule_strings))
 
@@ -124,7 +125,7 @@ def update_snakefile(snakefile,
     
     rule_strings = get_rule_string_block(scriptfile)
     
-    with open(snakefile+'test','w') as fid:
+    with open(snakefile,'w') as fid:
         
         skip_line=False
         for line in org_lines:
@@ -152,7 +153,7 @@ def update_snakefile(snakefile,
         
     
 
-string = update_snakefile(snakefile='../tests/workflow/snakefile', 
-                          scriptfile='../tests/workflow/script_template.py')
+# string = update_snakefile(snakefile='../tests/workflow/snakefile', 
+#                           scriptfile='../tests/workflow/script_template.py')
 
 

@@ -4,5 +4,7 @@
 Snakemake tools init
 """
 
+#print ('importing snakemaketools from: __init__.py')
+
 from . import builder 
 from . import helper
