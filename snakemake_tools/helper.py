@@ -14,9 +14,10 @@ import yaml
 
 
 
-# from pypsa-eur
+
 def configure_logging(snakemake, skip_handlers=False):
     """
+    # from pypsa-eur
     Configure the basic behaviour for the logging module.
     Note: Must only be called once from the __main__ section of a script.
     The setup includes printing log messages to STDERR and to a log file defined
@@ -62,6 +63,7 @@ def configure_logging(snakemake, skip_handlers=False):
     
 def mock_snakemake(rulename, configfiles=[], **wildcards):
     """
+    # from pypsa-eur
     This function is expected to be executed from the 'scripts'-directory of '
     the snakemake project. It returns a snakemake.script.Snakemake object,
     based on the Snakefile.

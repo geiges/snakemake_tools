@@ -54,10 +54,23 @@ def find_environment(string):
     else:
         match_str =  None
     return match_str
+
+def find_log(string):
+    if ('\'' in string):
+        match_str = re.findall("#SNAKE_DEF.*'(.*?)'", string)[0]
+        # output_name = re.findall("snakemake.output.(.*?)\)", string)[0]
+    elif '\"' in string:
+        match_str = re.findall('#SNAKE_DEF.*"(.*?)"', string)[0]
+        # output_name = re.findall("snakemake.output.(.*?)\)", string)[0]
+    else:
+        match_str =  None
+    return match_str
     
 def  get_rule_string_block(scriptfile):
      input_files = list()
      output_files = list()
+     environment = None
+     log_file = None
      with open(scriptfile, 'r') as fid:
          
          for line in fid.readlines():
@@ -83,6 +96,9 @@ def  get_rule_string_block(scriptfile):
                  if "environment" in line:
                      environment = find_environment(line)
                      
+                 if "logfile" in line:
+                     log_file = find_log(line)
+                         
                  
          #print(input_files)
          #print(output_files)
@@ -90,18 +106,26 @@ def  get_rule_string_block(scriptfile):
          # Concatenate rule string
          rule_strings = list()
          rule_strings.append(f'rule {rulename}:')
+        
          rule_strings.append('\tinput:')
          for inputstr in input_files:
              rule_strings.append(f'\t\t{inputstr}')
+         
          if environment is not None:
              rule_strings.append('\tconda:')
              rule_strings.append(f'\t\t"{environment}"')
+         
+         if log_file is not None:
+             rule_strings.append('\tlog:')
+             rule_strings.append(f'\t\tlog = "{log_file}"')
+         
          rule_strings.append('\toutput:')
          for outputstr in output_files:
              rule_strings.append(f'\t\t{outputstr}')
          rule_strings.append('\tscript:')
          rule_strings.append(f'\t\t"{pathlib.Path(scriptfile).name}"')
-         rule_strings.append('')
+        
+         rule_strings.append('\n')
          
      return rule_strings
      
