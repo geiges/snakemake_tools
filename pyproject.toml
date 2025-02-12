@@ -1,0 +1,9 @@
+[project]
+name = "snakemake-tools"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "snakemake>=7.32.4",
+]
