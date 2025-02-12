@@ -131,7 +131,7 @@ def update_snakefile(snakefile,
         for line in org_lines:
             
             
-            if 'rule' in line and skip_line:
+            if  line.startswith('rule') and skip_line:
                 #stop  skipping org input
                 skip_line = False
                 
