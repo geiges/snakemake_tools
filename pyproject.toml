@@ -7,3 +7,9 @@ requires-python = ">=3.10"
 dependencies = [
     "snakemake>=7.32.4",
 ]
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]

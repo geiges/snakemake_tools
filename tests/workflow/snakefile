@@ -1,4 +1,4 @@
-%% SNAKEFILE TEMPLATE FOR TESTING
+## SNAKEFILE TEMPLATE FOR TESTING
 
 rule all:
     input : 'result1.dummy'

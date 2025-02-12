@@ -5,11 +5,14 @@ Created on Tue Feb 11 09:01:04 2025
 
 @author: andreasgeiges
 """
+import pathlib
 import shutil 
 import os
 from snakemake_tools import builder
 #%%
-SNAKEFILE_TEMPLATE = '../tests/workflow/snakefile'
+TEST_PATH = pathlib.Path(__file__).parent 
+
+SNAKEFILE_TEMPLATE = TEST_PATH  /  'workflow/snakefile'
 SNAKEFILE_TEMP = '/tmp/snakefile'
 def test_standart_snakemake():
     
@@ -18,7 +21,7 @@ def test_standart_snakemake():
     except OSError:
         pass
 
-
+    os.chdir(TEST_PATH)
     os.system('snakemake -c1')    
     
     assert os.path.exists('result1.dummy')
@@ -27,12 +30,12 @@ def test_standart_snakemake():
 def test_add_rule():
     shutil.copy(SNAKEFILE_TEMPLATE, SNAKEFILE_TEMP)
     builder.add_snakemake_rule(snakefile=SNAKEFILE_TEMP, 
-                              scriptfile='workflow/script_template.py')
+                              scriptfile= TEST_PATH  / 'workflow/script_template.py')
     
     with open(SNAKEFILE_TEMP,'r') as fid:
         content_obs = fid.read()
         
-    with open('workflow/snakefile_exp_test_add','r') as fid:
+    with open( TEST_PATH  / 'workflow/snakefile_exp_test_add','r') as fid:
         content_exp = fid.read()
         
     assert content_exp == content_obs
@@ -41,17 +44,17 @@ def test_update_rule():
     
     shutil.copy(SNAKEFILE_TEMPLATE, SNAKEFILE_TEMP)
     builder.add_snakemake_rule(snakefile=SNAKEFILE_TEMP, 
-                              scriptfile='workflow/script_template.py')
+                              scriptfile= TEST_PATH  / 'workflow/script_template.py')
     
     _ = builder.update_snakefile(snakefile=SNAKEFILE_TEMP, 
-                              scriptfile='workflow/script_template_updated.py')
+                              scriptfile= TEST_PATH  / 'workflow/script_template_updated.py')
 
     with open(SNAKEFILE_TEMP,'r') as fid:
         content_obs = fid.read()
         
-    with open('workflow/snakefile_exp_test_update','r') as fid:
+    with open( TEST_PATH  /'workflow/snakefile_exp_test_update','r') as fid:
         content_exp = fid.read()
         
     assert content_exp == content_obs
 
-test_update_rule()
+#test_update_rule()
