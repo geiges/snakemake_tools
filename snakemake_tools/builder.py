@@ -23,11 +23,11 @@ def _find_rulename(string):
 def _find_input_def(string):
     
     if ('\'' in string) and ('#SNAKE_DEF' in string):
-        input_file = re.findall("#SNAKE_DEF:.*'(.*?)'", string)[0]
-        input_name = re.findall("snakemake.input.(.*?)\)", string)[0]
+        input_file = re.findall("#SNAKE_DEF.*'(.*?)'", string)[0]
+        input_name = re.findall("snakemake.input.([a-zA-Z_$0-9]*)", string)[0]
     elif '\"' in string:
-        input_file = re.findall('#SNAKE_DEF:.*"(.*?)"', string)[0]
-        input_name = re.findall("snakemake.input.(.*?)\)", string)[0]
+        input_file = re.findall('#SNAKE_DEF.*"(.*?)"', string)[0]
+        input_name = re.findall("snakemake.input.([a-zA-Z_$0-9]*)", string)[0]
     else:
         input_file = None
     return input_file, input_name
@@ -35,9 +35,9 @@ def _find_input_def(string):
 def _find_output_def(string):
     
     if ('\'' in string):
-        output_file = re.findall("#SNAKE_DEF:.*'(.*?)'", string)[0]
+        output_file = re.findall("#SNAKE_DEF.*'(.*?)'", string)[0]
     elif '\"' in string:
-        output_file = re.search('#SNAKE_DEF:.*"(.*?)"', string)[0]
+        output_file = re.search('#SNAKE_DEF.*"(.*?)"', string)[0]
    
     else:
         output_file = None
@@ -46,10 +46,10 @@ def _find_output_def(string):
 
 def find_environment(string):
     if ('\'' in string):
-        match_str = re.findall("#SNAKE_DEF:.*'(.*?)'", string)[0]
+        match_str = re.findall("#SNAKE_DEF.*'(.*?)'", string)[0]
         # output_name = re.findall("snakemake.output.(.*?)\)", string)[0]
     elif '\"' in string:
-        match_str = re.findall('#SNAKE_DEF:.*"(.*?)"', string)[0]
+        match_str = re.findall('#SNAKE_DEF.*"(.*?)"', string)[0]
         # output_name = re.findall("snakemake.output.(.*?)\)", string)[0]
     else:
         match_str =  None
@@ -100,8 +100,7 @@ def  get_rule_string_block(scriptfile):
          for outputstr in output_files:
              rule_strings.append(f'\t\t{outputstr}')
          rule_strings.append('\tscript:')
-         for outputstr in output_files:
-             rule_strings.append(f'\t\t"{pathlib.Path(scriptfile).name}"')
+         rule_strings.append(f'\t\t"{pathlib.Path(scriptfile).name}"')
          rule_strings.append('')
          
      return rule_strings
@@ -110,7 +109,7 @@ def add_snakemake_rule(snakefile, scriptfile):
     
     
     rule_strings = get_rule_string_block(scriptfile)
-    #print(rule_strings)
+    
     with open(snakefile, "a") as myfile:
         myfile.write('\n'.join(rule_strings))
 
@@ -124,10 +123,11 @@ def update_snakefile(snakefile,
         org_lines = fid.readlines()
     
     rule_strings = get_rule_string_block(scriptfile)
-    
+    print(rule_strings)
     with open(snakefile,'w') as fid:
         
         skip_line=False
+        found = False
         for line in org_lines:
             
             
@@ -143,9 +143,14 @@ def update_snakefile(snakefile,
                 fid.write('\n'.join(rule_strings))
                 #start skipping org input
                 skip_line =True
+                found = True
                 
             if not skip_line:
                 fid.write(line)
+                
+    if not found:
+        print('rule not found, adding new rule')
+        add_snakemake_rule(snakefile, scriptfile)
             
            
             

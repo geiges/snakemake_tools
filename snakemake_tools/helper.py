@@ -89,10 +89,11 @@ def mock_snakemake(rulename, configfiles=[], **wildcards):
     if user_in_script_dir:
         os.chdir(root_dir)
     elif Path.cwd().resolve() != root_dir:
-        raise RuntimeError(
-            "mock_snakemake has to be run from the repository root"
-            f" {root_dir} or scripts directory {script_dir}"
-        )
+        pass
+        # raise RuntimeError(
+        #     "mock_snakemake has to be run from the repository root"
+        #     f" {root_dir} or scripts directory {script_dir}"
+        # )
     try:
         for p in sm.SNAKEFILE_CHOICES:
             if os.path.exists(p):
