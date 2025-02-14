@@ -17,13 +17,16 @@ import yaml
 
 def configure_logging(snakemake, skip_handlers=False):
     """
-    # from pypsa-eur
+    Taken form pypsa-eur
     Configure the basic behaviour for the logging module.
+
     Note: Must only be called once from the __main__ section of a script.
+
     The setup includes printing log messages to STDERR and to a log file defined
     by either (in priority order): snakemake.log.python, snakemake.log[0] or "logs/{rulename}.log".
     Additional keywords from logging.basicConfig are accepted via the snakemake configuration
     file under snakemake.config.logging.
+
     Parameters
     ----------
     snakemake : snakemake object
@@ -31,23 +34,19 @@ def configure_logging(snakemake, skip_handlers=False):
     skip_handlers : True | False (default)
         Do (not) skip the default handlers created for redirecting output to STDERR and file.
     """
-    
+    import logging
+    import sys
 
     kwargs = snakemake.config.get("logging", dict()).copy()
     kwargs.setdefault("level", "INFO")
 
     if skip_handlers is False:
-        
-        
         fallback_path = Path(__file__).parent.joinpath(
             "..", "logs", f"{snakemake.rule}.log"
         )
         logfile = snakemake.log.get(
             "python", snakemake.log[0] if snakemake.log else fallback_path
         )
-        
-        os.makedirs(Path(logfile).parent, exist_ok=True)
-        
         kwargs.update(
             {
                 "handlers": [
@@ -59,9 +58,19 @@ def configure_logging(snakemake, skip_handlers=False):
             }
         )
     logging.basicConfig(**kwargs)
+
+    # Setup a function to handle uncaught exceptions and include them with their stacktrace into logfiles
+    def handle_exception(exc_type, exc_value, exc_traceback):
+        # Log the exception
+        logger = logging.getLogger()
+        logger.error(
+            "Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback)
+        )
+
+    sys.excepthook = handle_exception
     
     
-def mock_snakemake(rulename, configfiles=[], **wildcards):
+def mock_snakemake(rulename, script_file, configfiles=[], **wildcards):
     """
     # from pypsa-eur
     This function is expected to be executed from the 'scripts'-directory of '
@@ -84,7 +93,7 @@ def mock_snakemake(rulename, configfiles=[], **wildcards):
     from packaging.version import Version, parse
     from snakemake.script import Snakemake
 
-    script_dir = Path(__file__).parent.resolve()
+    script_dir = Path(script_file).parent.resolve()
     root_dir = script_dir.parent
 
     user_in_script_dir = Path.cwd().resolve() == script_dir
@@ -115,17 +124,18 @@ def mock_snakemake(rulename, configfiles=[], **wildcards):
                 if not os.path.exists(f):
                     raise FileNotFoundError(f"Config file {f} does not exist.")
                 workflow.configfile(f)
-
+        
         workflow.global_resources = {}
         rule = workflow.get_rule(rulename)
         dag = sm.dag.DAG(workflow, rules=[rule])
         wc = wildcards #Dict(wildcards)
         job = sm.jobs.Job(rule, dag, wc)
-
+        
         def make_accessable(*ios):
-            for io in ios:
-                for i in range(len(io)):
-                    io[i] = os.path.abspath(io[i])
+                for io in ios:
+                    for i in range(len(io)):
+                        io[i] = os.path.abspath(io[i])
+                    
 
         make_accessable(job.input, job.output, job.log)
         snakemake = Snakemake(
