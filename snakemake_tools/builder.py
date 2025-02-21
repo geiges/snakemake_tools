@@ -10,6 +10,7 @@ import pathlib
 import datetime
 import shutil
 
+
 def _find_rulename(string):
     
     if '\'' in string:
@@ -22,25 +23,43 @@ def _find_rulename(string):
 
 def _find_input_def(string):
     
-    if ('\'' in string) and ('#SNAKE_DEF' in string):
+    #if string.endswith("'\n")
+    if string.endswith("'\n") and ('#SNAKE_DEF' in string):
         input_file = re.findall("#SNAKE_DEF.*'(.*?)'", string)[0]
         input_name = re.findall("snakemake.input.([a-zA-Z_$0-9]*)", string)[0]
-    elif '\"' in string:
+        input_file = f"'{input_file}'"
+    elif string.endswith('"\n'):
         input_file = re.findall('#SNAKE_DEF.*"(.*?)"', string)[0]
         input_name = re.findall("snakemake.input.([a-zA-Z_$0-9]*)", string)[0]
+        input_file = f"'{input_file}'"
+    elif string.endswith(")\n") or string.endswith("]\n"):
+        #assuming functional input
+        
+        input_file = re.findall("#SNAKE_DEF (.*?)\n", string)[0]
+        input_name = re.findall("snakemake.input.([a-zA-Z_$0-9]*)", string)[0]
+
     else:
-        input_file = None
+        pass
+        #input_file = None
     return input_file, input_name
 
 def _find_output_def(string):
     
-    if ('\'' in string):
+    if string.endswith("'\n") and ('#SNAKE_DEF' in string):
         output_file = re.findall("#SNAKE_DEF.*'(.*?)'", string)[0]
-    elif '\"' in string:
-        output_file = re.search('#SNAKE_DEF.*"(.*?)"', string)[0]
-   
+        output_file = f"'{output_file}'"
+        
+    elif string.endswith('"\n'):
+        output_file = re.findall('#SNAKE_DEF.*"(.*?)"', string)[0]
+        output_file = f"'{output_file}'"
+    
+    elif string.endswith(")\n") or string.endswith("]\n"):
+        #assuming functional input
+        output_file = re.findall("#SNAKE_DEF (.*?)\n", string)[0]
+        output_file = f"'{output_file}'"
     else:
-        output_file = None
+        pass
+        #output_file = None
     output_name = re.findall("snakemake.output.([a-zA-Z_$0-9]*)", string)[0]
     return output_file, output_name
 
@@ -86,13 +105,13 @@ def  get_rule_string_block(scriptfile):
                  if  'snakemake.input.' in line:
                      input_file, input_name = _find_input_def(line )
                      if input_file is not None:
-                         input_files.append(f'{input_name} = "{input_file}",')
+                         input_files.append(f'{input_name} = {input_file},')
                      
                  if  'snakemake.output.' in line:
                      output_file, output_name = _find_output_def(line )
                      
                      if output_file is not None: 
-                         output_files.append(f'{output_name} = "{output_file}",') 
+                         output_files.append(f'{output_name} = {output_file},') 
                  if "environment" in line:
                      environment = find_environment(line)
                      
@@ -140,9 +159,10 @@ def add_snakemake_rule(snakefile, scriptfile):
          
 def update_snakefile(snakefile,
                      scriptfile):
-
     
-    shutil.copyfile(snakefile, f'{snakefile}_{datetime.datetime.now().strftime("%Y%m%d_%H%m%S")}.bkp')
+    filename = pathlib.Path(scriptfile).name
+    print('Making backup of snakefile to /tmp')
+    shutil.copyfile(snakefile, f'/tmp/{filename}_{datetime.datetime.now().strftime("%Y%m%d_%H%m%S")}.bkp')
     with open(snakefile, 'r') as fid:
         org_lines = fid.readlines()
     
