@@ -3,9 +3,9 @@ name = "snakemake-tools"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
-    "snakemake>=7.32.4",
+    "snakemake>=8.0.0",
 ]
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -14,7 +14,12 @@ testpaths = [
     "tests",
 ]
 
+[tool.uv.sources]
+snakemake-tools = { workspace = true }
+
 [dependency-groups]
 dev = [
+    "pytest>=8.3.5",
+    "snakemake-tools",
     "spyder>=6.0.4",
 ]
