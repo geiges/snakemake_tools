@@ -13,3 +13,8 @@ addopts = "-ra -q"
 testpaths = [
     "tests",
 ]
+
+[dependency-groups]
+dev = [
+    "spyder>=6.0.4",
+]
