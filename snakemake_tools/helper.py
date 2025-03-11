@@ -103,7 +103,7 @@ def mock_snakemake(
     import os
 
     import snakemake as sm
-    from pypsa.definitions.structures import Dict
+    #from pypsa.definitions.structures import Dict
     from snakemake.api import Workflow
     from snakemake.common import SNAKEFILE_CHOICES
     from snakemake.script import Snakemake
@@ -129,7 +129,8 @@ def mock_snakemake(
     elif user_in_script_dir:
         os.chdir(root_dir)
     elif Path.cwd().resolve() != root_dir:
-        logger.info(
+        
+        print(
             "Not in scripts or root directory, will assume this is a separate workdir"
         )
         workdir = Path.cwd()
@@ -170,7 +171,7 @@ def mock_snakemake(
         workflow.global_resources = {}
         rule = workflow.get_rule(rulename)
         dag = sm.dag.DAG(workflow, rules=[rule])
-        wc = Dict(wildcards)
+        wc = wildcards #Dict(wildcards)
         job = sm.jobs.Job(rule, dag, wc)
 
         def make_accessable(*ios):
